@@ -1,0 +1,75 @@
+[11:32 AM, 7/24/2024] Adhithya Ai Ds : from langchain_community.llms import Ollama
+from langchain.chains import SequentialChain
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+
+
+def generate_restaurant_name_and_items(cuisine: str):
+    llm = Ollama(model="llama3")
+
+    prompt_template_name = PromptTemplate(
+        input_variables=['cuisine'],
+        template="I want to open a restaurant for {cuisine} food. Suggest a fancy name for the restaurant. Just give me"
+                 "one name and nothing else including the boilerplate message.!!"
+    )
+    name_chain = LLMChain(llm=llm, prompt=prompt_template_name, output_key='restaurant_name')
+
+    prompt_template_restaurant = PromptTemplate(
+        input_variables=['restaurant_name'],
+        template="Suggest some menu items for {restaurant_name}. Return it as a comma separated values only and nothing"
+                 "else including the boilerplate message."
+    )
+    food_items_chain = LLMChain(llm=llm, prompt=prompt_template_restaurant, output_key='menu_items')
+
+    chain = SequentialChain(
+        chains=[name_chain, food_items_chain],
+        input_variables=['cuisine'],
+        output_variables=['restaurant_name', 'menu_items']
+    )
+
+    response = chain({'cuisine': cuisine})
+    return response
+
+attention all units, attention all units
+
+numerous complaints received about a speeding vehicle 
+
+suspect was last seen heading northbound on highway 201
+
+son yk once u start there is no going back
+
+
+
+
+
+
+
+
+import streamlit as st
+import langchain_helper as lch
+
+st.title('Restaurant Name Generator')
+
+cuisines = [
+    "Italian",
+    "Chinese",
+    "Indian",
+    "Mexican",
+    "French",
+    "Japanese",
+    "Thai",
+    "Greek",
+    "Spanish",
+    "Lebanese"
+]
+cuisine = st.sidebar.selectbox("Pick a Cuisine", cuisines)
+
+if cuisine:
+    response = lch.generate_restaurant_name_and_items(cuisine)
+    st.subheader(f"{response['restaurant_name']}")
+
+    menu_items = response['menu_items'].split(',')
+
+    st.write("*Menu Items*")
+    for item in menu_items:
+        st.write(f"- {item.strip()}")
